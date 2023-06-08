@@ -81,32 +81,38 @@ if __name__ == '__main__':
       split.append(number[-3:])
       number = number[:-3]
 
-      print(split)
-
     cache = []
     for suffix_i, n in enumerate(reversed(split)):
       hundreds_reppresentation = []
-      n = '0'*(len(n) % 3) + n
+      n = '0'*((len(n) % 3) - 1) + n
 
-      if n[-2:] in special:
-        if n[0] != '0':
-          hundreds_reppresentation.append(alpha[int(n[0])] + ' hundred')
-        hundreds_reppresentation.append(special[n[-2:]])
+      if n[0] != '0':
+        hundreds_reppresentation.append(alpha[int(n[0]) - 1] + ' hundred')
 
-      else:
-        for i, digit in enumerate(n):
-          digit = int(digit)
+      hundreds_reppresentation.append(
+        ((n[-2:] in special) and special[n[-2:]]) or
+        ' '.join([num for num in [
+          (n[1] != '0') and special[n[1] + '0'],
+          (n[2] != '0' and alpha[int(n[2]) - 1])
+        ] if num])
+      )
 
-          if digit == 0: continue
-          hundreds_reppresentation.append(alpha[digit - 1] + ' ' + suffix[2 - i])
-
-      block = (
+      num_block = (
         (
           (len(hundreds_reppresentation) > 1) and
           (', '.join(hundreds_reppresentation[:-1]) + ' and ' + hundreds_reppresentation[-1])
         ) or
         hundreds_reppresentation[0]
       )
-      cache.append(block + suffix[suffix_i])
+      cache.append(
+        num_block +
+        ((len(suffix) > suffix_i*3) and suffix[suffix_i*3]) or ''
+      )
 
-    print(', '.join(cache))
+    stdout = ', '.join([item for item in cache[:-1] if item])
+    if cache[-1] in suffix:
+      stdout += ' ' + cache[-1]
+    else:
+      stdout += ((stdout and ', ') or '') + cache[-1]
+
+    print(stdout)
